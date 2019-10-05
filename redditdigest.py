@@ -50,12 +50,11 @@ def get_cat_post():
         choice = random.choice(image_posts)
         try:
             cat_pic = get_image(choice.url)
+            logging.info(f"Selected {choice.permalink}")
+            return {"pic": cat_pic, "title": choice.title, "link":choice.permalink}
         except DownloadError:
             tries += 1
         else:
             break
     else:
         return None
-
-    logging.info(f"Selected {choice.permalink}")
-    return {"pic": cat_pic, "title": choice.title, "link":choice.permalink}
