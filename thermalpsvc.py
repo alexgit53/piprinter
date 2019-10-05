@@ -69,7 +69,12 @@ class PrintSvc:
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG,filename='thermalsvc.log', format='%(relativeCreated)6d %(threadName)s %(message)s')
+    logging.basicConfig(
+        level=logging.DEBUG,
+        filename='thermalsvc.log',
+        format='%(asctime)s %(relativeCreated)6d %(threadName)s %(levelname)-8s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
     printsvc = PrintSvc(port=PRINTER_PORT, led_pin=LED_PIN, button_pin=BUTTON_PIN)
     logging.info("Running")
     printsvc.run()
