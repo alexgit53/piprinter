@@ -48,6 +48,7 @@ class PrintSvc:
         return image
 
     def _print_handler(self, pin):
+        print("Button press received")
         Thread(target=self._print_message).start()
 
     def _print_message(self):
@@ -63,7 +64,6 @@ class PrintSvc:
             self.printer.out(f"Have a good {day_section}.")
         finally:
             self._set_led(False)
-
 
 
 def main():
