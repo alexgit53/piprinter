@@ -35,8 +35,9 @@ def get_image(url):
 def get_cat_post():
     logging.debug("Fetching cat post")
     reddit = praw.Reddit("bot1", user_agent="pc:com.ozymandias.redditdigest:v1 (by /u/CoachOzymandias)")
-    image_posts = []
-    for post in reddit.subreddit('cats').random_rising():
+    posts = list(reddit.subreddit('cats').top("day", limit=100))
+    posts = random.shuffle(posts)
+    for post in posts:
         if is_image_post(post) and not post.over_18:
             break
     tries = 0
