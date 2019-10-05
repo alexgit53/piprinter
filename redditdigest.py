@@ -31,7 +31,6 @@ def get_image(url):
         for chunk in r.iter_content():
             downloaded += len(chunk)
             buffer.write(chunk)
-            print(downloaded/filesize)
         buffer.seek(0)
         i = Image.open(io.BytesIO(buffer.read()))
         i.save(os.path.join(out_dir, 'image.jpg'), quality=85)
