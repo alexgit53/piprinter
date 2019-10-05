@@ -41,8 +41,11 @@ class PrintSvc:
         GPIO.remove_event_detect(self.button_pin)
         GPIO.add_event_detect(self.button_pin, GPIO.FALLING, bouncetime=500)
         GPIO.add_event_callback(self.button_pin, self._print_handler)
-        while True:
-            sleep(0.01)
+        try:
+            while True:
+                sleep(0.01)
+        finally:
+            GPIO.cleanup()
 
     def _scaled_image(self, image):
         size = (384, 256)
