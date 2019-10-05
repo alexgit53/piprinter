@@ -2,6 +2,10 @@ import praw
 import re
 import random
 import requests
+import os
+import io
+from PIL import Image
+import tempfile
 
 MAX_IMAGE_BYTES = 10e6
 MAX_DOWNLOAD_TRIES = 5
@@ -16,42 +20,44 @@ def is_image_post(submission):
     return submission.url.startswith(r"https://i.redd.it")
 
 
-def download_file(url):
+def get_image(url):
+    buffer = tempfile.SpooledTemporaryFile(max_size=MAX_IMAGE_BYTES)
     r = requests.get(url, stream=True)
-    image_size = int(r.headers.get("Content-Length"))
-    if image_size > MAX_IMAGE_BYTES:
-        raise DownloadError(f"Image size ({image_size}) exceeds maximum size of {MAX_IMAGE_BYTES} bytes.")
     if r.status_code == 200:
-        with open("tmp/image.jpg", 'wb') as f:
-            for chunk in r:
-                f.write(chunk)
-    else:
-        raise DownloadError(f"Image request failed: response code {r.status_code}.")
+        image_size = int(r.headers.get("Content-Length"))
+        if image_size > MAX_IMAGE_BYTES:
+            raise DownloadError(f"Image size ({image_size}) exceeds maximum size of {MAX_IMAGE_BYTES} bytes.")
+        downloaded = 0
+        filesize = int(r.headers['content-length'])
+        for chunk in r.iter_content():
+            downloaded += len(chunk)
+            buffer.write(chunk)
+            print(downloaded/filesize)
+        buffer.seek(0)
+        i = Image.open(io.BytesIO(buffer.read()))
+        i.save(os.path.join(out_dir, 'image.jpg'), quality=85)
+    buffer.close()
 
 
 def get_cat_post():
     reddit = praw.Reddit("bot1", user_agent="pc:com.ozymandias.redditdigest:v1 (by /u/CoachOzymandias)")
-
-    image_subs = []
-    for submission in reddit.subreddit('cats').top("day", limit=50):
-        if is_image_post(submission):
-            image_subs.append(submission)
-        if len(image_subs) >= 10:
+    image_posts = []
+    for post in reddit.subreddit('cats').top("day", limit=50):
+        if is_image_post(post) and not post.over_18:
+            image_posts.append(post)
+        if len(image_posts) >= 10:
             break
 
     tries = 0
     while tries < MAX_DOWNLOAD_TRIES:
-        sub = random.choice(image_subs)
+        choice = random.choice(image_posts)
         try:
-            download_file(sub.url)
+            cat_pic = get_image(choice.url)
         except DownloadError:
             tries += 1
         else:
             break
     else:
-        raise ValueError("Could not download cat picture. Sorry. ^oᴥo^")
+        return None
 
-
-
-if __name__ == '__main__':
-    get_cat_post()
+    return {"pic": cat_pic, "title": choice.title, "link":choice.permalink}
