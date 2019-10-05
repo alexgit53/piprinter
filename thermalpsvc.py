@@ -49,7 +49,7 @@ class PrintSvc:
 
     def _print_handler(self, pin):
         print("Button press received")
-        Thread(target=_self.print_message).start()
+        Thread(target=self._print_message).start()
 
     def _print_message(self):
         self._set_led(True)
