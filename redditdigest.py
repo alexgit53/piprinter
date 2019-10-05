@@ -20,21 +20,17 @@ def is_image_post(submission):
 
 
 def get_image(url):
-    buffer = tempfile.SpooledTemporaryFile(max_size=MAX_IMAGE_BYTES)
-    r = requests.get(url, stream=True)
-    if r.status_code == 200:
-        image_size = int(r.headers.get("Content-Length"))
-        if image_size > MAX_IMAGE_BYTES:
-            raise DownloadError(f"Image size ({image_size}) exceeds maximum size of {MAX_IMAGE_BYTES} bytes.")
-        downloaded = 0
-        filesize = int(r.headers['content-length'])
-        for chunk in r.iter_content():
-            downloaded += len(chunk)
-            buffer.write(chunk)
-        buffer.seek(0)
-        i = Image.open(io.BytesIO(buffer.read()))
-        i.save(os.path.join(out_dir, 'image.jpg'), quality=85)
-    buffer.close()
+    with tempfile.SpooledTemporaryFile(max_size=MAX_IMAGE_BYTES) as buffer:
+        r = requests.get(url, stream=True)
+        if r.status_code == 200:
+            image_size = int(r.headers.get("Content-Length"))
+            if image_size > MAX_IMAGE_BYTES:
+                raise DownloadError(f"Image size ({image_size}) exceeds maximum size of {MAX_IMAGE_BYTES} bytes.")
+            for chunk in r.iter_content():
+                buffer.write(chunk)
+            buffer.seek(0)
+            i = Image.open(io.BytesIO(buffer.read()))
+            return i
 
 
 def get_cat_post():
