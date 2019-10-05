@@ -48,7 +48,6 @@ class PrintSvc:
         return image
 
     def _print_handler(self, pin):
-        print("Button press received")
         Thread(target=self._print_message).start()
 
     def _print_message(self):

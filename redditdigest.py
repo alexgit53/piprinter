@@ -1,5 +1,4 @@
 import praw
-import re
 import random
 import requests
 import os
