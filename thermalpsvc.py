@@ -4,6 +4,7 @@ from time import sleep
 from threading import Thread
 from redditdigest import get_cat_post
 from datetime import datetime
+import logging
 
 
 LED_PIN = 18
@@ -30,7 +31,7 @@ class PrintSvc:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.led_pin, GPIO.OUT)
         GPIO.setup(self.button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        print("Setup OK")
+        logging.info("Printer setup OK")
 
     def _set_led(self, val):
         GPIO.output(self.led_pin, val)
@@ -48,7 +49,7 @@ class PrintSvc:
         return image
 
     def _print_handler(self, pin):
-        print("Button press received")
+        logging.info("Button press received")
         Thread(target=self._print_message).start()
 
     def _print_message(self):
@@ -60,15 +61,19 @@ class PrintSvc:
             self.printer.out("Hello! Here's a picture of a cat...")
             self.printer.image(self._scaled_image(post["pic"]))
             self.printer.out(post["title"])
-            self.printer.out(post["url"])
+            self.printer.out(post["link"])
             self.printer.out(f"Have a good {day_section}.")
+            self.printer.feed(3)
         finally:
             self._set_led(False)
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG,filename='thermalsvc.log', format='%(relativeCreated)6d %(threadName)s %(message)s')
     printsvc = PrintSvc(port=PRINTER_PORT, led_pin=LED_PIN, button_pin=BUTTON_PIN)
+    logging.info("Running")
     printsvc.run()
+    logging.info("Run complete")
 
 
 if __name__ == '__main__':

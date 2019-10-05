@@ -5,6 +5,8 @@ import os
 import io
 from PIL import Image
 import tempfile
+import logging
+
 
 MAX_IMAGE_BYTES = 10e6
 MAX_DOWNLOAD_TRIES = 5
@@ -34,6 +36,7 @@ def get_image(url):
 
 
 def get_cat_post():
+    logging.debug("Fetching cat post")
     reddit = praw.Reddit("bot1", user_agent="pc:com.ozymandias.redditdigest:v1 (by /u/CoachOzymandias)")
     image_posts = []
     for post in reddit.subreddit('cats').top("day", limit=50):
@@ -54,4 +57,5 @@ def get_cat_post():
     else:
         return None
 
+    logging.info(f"Selected {choice.permalink}")
     return {"pic": cat_pic, "title": choice.title, "link":choice.permalink}
