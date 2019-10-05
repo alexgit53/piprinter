@@ -24,18 +24,13 @@ def is_image_post(submission):
 def get_image(url):
     logging.debug("Fetching image")
     with tempfile.SpooledTemporaryFile(max_size=MAX_IMAGE_BYTES) as buffer:
-        r = requests.get(url, stream=True)
+        r = requests.get(url)
         if r.status_code == 200:
-            image_size = int(r.headers.get("Content-Length"))
-            if image_size > MAX_IMAGE_BYTES:
-                logging.info("Image exeeds size limit")
-                raise DownloadError(f"Image size ({image_size}) exceeds maximum size of {MAX_IMAGE_BYTES} bytes.")
-            for chunk in r.iter_content():
-                buffer.write(chunk)
-            buffer.seek(0)
-            i = Image.open(io.BytesIO(buffer.read()))
+            i = Image.open(io.BytesIO(r.content))
             return i
-
+        else:
+            raise DownloadError("Download failed")
+            
 
 def get_cat_post():
     logging.debug("Fetching cat post")
