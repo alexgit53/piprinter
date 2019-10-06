@@ -48,7 +48,7 @@ class PrintSvc:
             GPIO.cleanup()
 
     def _scaled_image(self, image):
-        size = (384, 256)
+        size = (384, 512)
         image.thumbnail(size)
         return image
 
