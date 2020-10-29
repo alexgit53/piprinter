@@ -103,5 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Pycharm
+.idea/
+
 # Project-specific
 praw.ini
