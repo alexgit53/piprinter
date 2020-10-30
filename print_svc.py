@@ -6,7 +6,7 @@ import time
 import logging
 
 
-PRINTER_PORT = "/dev/serial0"
+PRINTER_PORT = "/dev/ttyS0"
 
 
 def get_day_section(hour):
@@ -56,16 +56,19 @@ def main():
     printer = ThermalPrinter(port=PRINTER_PORT)
     logging.info("Printer initialised")
     while True:
-        if r.get("print") == "true":
+        print_val = r.get("print")
+        logging.debug(f"Redis 'print' key: {print_val}")
+        if print_val:
             logging.info("Printing...")
-            r.set("print", "false")
             post = build_post()
             print_post(post, printer)
             logging.info("Print completed")
+            r.set("print", "")
             time.sleep(5)
         else:
             time.sleep(1)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.WARN)
     main()
