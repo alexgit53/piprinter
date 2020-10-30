@@ -18,6 +18,10 @@ class ButtonHandler:
         self.redis = redis_con
         self.press_key = press_key
         self.led_key = led_key
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.led_pin, GPIO.OUT)
+        GPIO.setup(self.button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        logging.info("Button setup OK")
 
     def run(self):
         GPIO.remove_event_detect(self.button_pin)
