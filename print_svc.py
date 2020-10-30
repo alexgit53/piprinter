@@ -3,6 +3,7 @@ from redditdigest import get_cat_post
 from datetime import datetime
 import redis
 import time
+import logging
 
 
 PRINTER_PORT = "/dev/serial0"
@@ -50,14 +51,21 @@ def print_post(post, printer):
 
 
 def main():
-    r = redis.Redis(host='localhost', port=6379, db=0)
+    r = redis.Redis(host="localhost", port=6379, db=0)
+    logging.info("Connected to Redis")
     printer = ThermalPrinter(port=PRINTER_PORT)
+    logging.info("Printer initialised")
     while True:
         if r.get("print") == "true":
+            logging.info("Printing...")
             r.set("print", "false")
             post = build_post()
             print_post(post, printer)
+            logging.info("Print completed")
             time.sleep(5)
         else:
             time.sleep(1)
 
+
+if __name__ == "__main__":
+    main()
