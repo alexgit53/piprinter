@@ -7,6 +7,10 @@ import logging
 
 
 PRINTER_PORT = "/dev/ttyS0"
+TO_PRINT_KEY = "print"
+IS_PRINTING_KEY = "printing"
+REDIS_TRUE = "true"
+REDIS_FALSE = ""
 
 
 def get_day_section(hour):
@@ -55,15 +59,18 @@ def main():
     logging.info("Connected to Redis")
     printer = ThermalPrinter(port=PRINTER_PORT)
     logging.info("Printer initialised")
+    r.set(IS_PRINTING_KEY, REDIS_FALSE)
     while True:
-        print_val = r.get("print")
+        print_val = r.get(TO_PRINT_KEY)
         logging.debug(f"Redis 'print' key: {print_val}")
         if print_val:
+            r.set(IS_PRINTING_KEY, REDIS_TRUE)
             logging.info("Printing...")
             post = build_post()
             print_post(post, printer)
             logging.info("Print completed")
-            r.set("print", "")
+            r.set(TO_PRINT_KEY, REDIS_FALSE)
+            r.set(IS_PRINTING_KEY, REDIS_FALSE)
             time.sleep(5)
         else:
             time.sleep(1)
